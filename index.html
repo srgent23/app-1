@@ -5,33 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Discharge Complexity + Care Burden Scale</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap');
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --navy: #0f2340;
-    --teal: #1a7a8a;
-    --teal-light: #e8f4f6;
-    --gold: #c8972a;
-    --red: #c0392b;
-    --orange: #d35400;
+    /* Oklahoma Children's Hospital OU Health brand palette */
+    --navy: #8B1A1A;          /* OCH crimson — primary brand */
+    --navy-dark: #6B1010;     /* deeper crimson for hover/dark use */
+    --teal: #8B1A1A;          /* unified to crimson for selected states */
+    --teal-light: #fdf0f0;    /* very light crimson tint */
+    --gold: #C8972A;          /* warm gold accent — kept from original */
+    --red: #c0392b;           /* alert red — distinct from brand crimson */
+    --orange: #C47A20;        /* warm amber for mid-level warnings */
     --green: #1e7e4e;
     --green-light: #e8f5ee;
-    --red-light: #fdf0ee;
+    --red-light: #fdf0f0;
     --orange-light: #fef5ec;
-    --gray: #f4f5f7;
-    --gray-mid: #e2e5ea;
-    --text: #1a2530;
-    --text-light: #5a6a7a;
+    --gray: #f7f5f4;          /* warm off-white, not cold blue-gray */
+    --gray-mid: #e0dbd8;      /* warm mid-gray */
+    --text: #2a1a1a;          /* warm dark, not cold navy */
+    --text-light: #6b5a5a;    /* warm muted */
     --white: #ffffff;
-    --shadow: 0 2px 12px rgba(15,35,64,0.08);
-    --shadow-lg: 0 8px 32px rgba(15,35,64,0.12);
+    --shadow: 0 2px 12px rgba(139,26,26,0.07);
+    --shadow-lg: 0 8px 32px rgba(139,26,26,0.10);
   }
 
   body {
-    font-family: 'DM Sans', sans-serif;
-    background: #f0f3f7;
+    font-family: 'Source Sans 3', sans-serif;
+    background: #f5f2f1;
     color: var(--text);
     min-height: 100vh;
     padding: 0 0 60px;
@@ -40,12 +42,27 @@
   /* HEADER */
   .header {
     background: var(--navy);
-    padding: 28px 32px 24px;
+    padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 2px 16px rgba(15,35,64,0.25);
+    box-shadow: 0 2px 16px rgba(107,16,16,0.35);
+    border-bottom: 3px solid rgba(255,255,255,0.15);
   }
+  .header-topbar {
+    background: var(--navy-dark);
+    padding: 6px 32px;
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .header-topbar span { color: rgba(255,255,255,0.75); }
+  .header-main {
+    padding: 20px 32px 18px;
+  }
+  .header-main { padding: 20px 32px 18px; }
   .header-inner {
     max-width: 960px;
     margin: 0 auto;
@@ -56,7 +73,7 @@
     flex-wrap: wrap;
   }
   .header-title {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Source Serif 4', serif;
     font-size: 1.5rem;
     color: var(--white);
     line-height: 1.2;
@@ -83,7 +100,7 @@
     font-weight: 500;
   }
   .score-badge-value {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Source Serif 4', serif;
     font-size: 2.2rem;
     color: var(--white);
     line-height: 1.1;
@@ -134,16 +151,16 @@
     box-shadow: var(--shadow);
   }
   .hard-stop-header {
-    background: #fdf2f1;
+    background: #fdf0f0;
     padding: 14px 20px;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid #f0d0cc;
+    border-bottom: 1px solid #e8cccc;
   }
   .hard-stop-header .icon { font-size: 1.1rem; }
   .hard-stop-header h2 {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Source Serif 4', serif;
     font-size: 1rem;
     color: #8b2020;
   }
@@ -205,7 +222,7 @@
     box-shadow: var(--shadow);
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .domain-card.has-score { border-color: var(--teal); box-shadow: 0 2px 16px rgba(26,122,138,0.1); }
+  .domain-card.has-score { border-color: var(--navy); box-shadow: 0 2px 16px rgba(139,26,26,0.1); }
   .domain-card.high-score { border-color: var(--orange); box-shadow: 0 2px 16px rgba(211,84,0,0.1); }
   .domain-card.max-score { border-color: var(--red); box-shadow: 0 2px 16px rgba(192,57,43,0.1); }
 
@@ -221,7 +238,7 @@
   .domain-title {
     font-weight: 600;
     font-size: 0.92rem;
-    color: var(--navy);
+    color: var(--navy-dark);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -235,7 +252,7 @@
   }
   .weight-3 { background: #fde8e6; color: #8b2020; }
   .weight-2 { background: #fef0e0; color: #8b5000; }
-  .weight-1 { background: var(--teal-light); color: #0f6070; }
+  .weight-1 { background: #fdf0f0; color: #8B1A1A; }
   .domain-subtitle { font-size: 0.73rem; color: var(--text-light); margin-top: 2px; }
 
   .domain-score-display {
@@ -244,13 +261,13 @@
   }
   .domain-raw { font-size: 0.68rem; color: var(--text-light); }
   .domain-weighted {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Source Serif 4', serif;
     font-size: 1.4rem;
     color: var(--text-light);
     line-height: 1;
     transition: color 0.3s;
   }
-  .domain-card.has-score .domain-weighted { color: var(--teal); }
+  .domain-card.has-score .domain-weighted { color: var(--navy); }
   .domain-card.high-score .domain-weighted { color: var(--orange); }
   .domain-card.max-score .domain-weighted { color: var(--red); }
   .domain-pts { font-size: 0.68rem; color: var(--text-light); }
@@ -268,8 +285,8 @@
     transition: all 0.18s;
     background: var(--gray);
   }
-  .level-option:hover { background: var(--teal-light); border-color: rgba(26,122,138,0.3); }
-  .level-option.selected { background: var(--teal-light); border-color: var(--teal); }
+  .level-option:hover { background: var(--teal-light); border-color: rgba(139,26,26,0.3); }
+  .level-option.selected { background: var(--teal-light); border-color: var(--navy); }
   .level-option.selected-high { background: #fef0e0; border-color: var(--orange); }
   .level-option.selected-max { background: #fdf0ee; border-color: var(--red); }
   .level-option input { display: none; }
@@ -285,7 +302,7 @@
     color: white;
     font-weight: 700;
   }
-  .level-option.selected .level-dot { background: var(--teal); border-color: var(--teal); }
+  .level-option.selected .level-dot { background: var(--navy); border-color: var(--navy); }
   .level-option.selected-high .level-dot { background: var(--orange); border-color: var(--orange); }
   .level-option.selected-max .level-dot { background: var(--red); border-color: var(--red); }
   .level-text { flex: 1; }
@@ -309,7 +326,7 @@
     box-shadow: var(--shadow);
   }
   .confidence-title {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Source Serif 4', serif;
     font-size: 1rem;
     color: var(--navy);
     margin-bottom: 4px;
@@ -330,10 +347,10 @@
     cursor: pointer;
     text-align: center;
     transition: all 0.18s;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
   }
-  .conf-btn:hover { border-color: var(--teal); background: var(--teal-light); }
-  .conf-btn.selected { border-color: var(--teal); background: var(--teal-light); }
+  .conf-btn:hover { border-color: var(--navy); background: var(--teal-light); }
+  .conf-btn.selected { border-color: var(--navy); background: var(--teal-light); }
   .conf-btn.selected-warn { border-color: var(--red); background: var(--red-light); }
   .conf-abbr { font-size: 1.1rem; font-weight: 700; color: var(--navy); display: block; }
   .conf-label { font-size: 0.68rem; color: var(--text-light); margin-top: 2px; }
@@ -354,7 +371,7 @@
     align-items: center;
     justify-content: space-between;
   }
-  .results-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--white); }
+  .results-header h2 { font-family: 'Source Serif 4', serif; font-size: 1.1rem; color: var(--white); }
   .results-body { padding: 20px 22px; }
 
   .score-breakdown {
@@ -369,7 +386,7 @@
     background: var(--gray);
     border-left: 3px solid var(--gray-mid);
   }
-  .breakdown-item.scored { border-left-color: var(--teal); }
+  .breakdown-item.scored { border-left-color: var(--navy); }
   .breakdown-item.scored-high { border-left-color: var(--orange); }
   .breakdown-item.scored-max { border-left-color: var(--red); }
   .bi-name { font-size: 0.75rem; font-weight: 600; color: var(--text-light); }
@@ -386,7 +403,7 @@
   .verdict-box.moderate { border-color: var(--gold); background: #fdf8ec; }
   .verdict-box.high { border-color: var(--orange); background: var(--orange-light); }
   .verdict-box.critical { border-color: var(--red); background: var(--red-light); }
-  .verdict-title { font-family: 'DM Serif Display', serif; font-size: 1.15rem; }
+  .verdict-title { font-family: 'Source Serif 4', serif; font-size: 1.15rem; }
   .verdict-box.light .verdict-title { color: #1e6e40; }
   .verdict-box.moderate .verdict-title { color: #8b6a00; }
   .verdict-box.high .verdict-title { color: #8b3a00; }
@@ -404,14 +421,14 @@
     border-radius: 8px;
     border: 1.5px solid var(--gray-mid);
     background: var(--white);
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
     color: var(--text-light);
     cursor: pointer;
     transition: all 0.18s;
   }
-  .reset-btn:hover { border-color: var(--navy); color: var(--navy); }
+  .reset-btn:hover { border-color: var(--navy-dark); color: var(--navy-dark); }
 
   /* PROGRESS BAR */
   .progress-bar-wrap {
@@ -438,10 +455,12 @@
 <body>
 
 <div class="header">
+  <div class="header-topbar">Oklahoma Children's Hospital OU Health &nbsp;·&nbsp; <span>Pediatric Cardiac ICU</span></div>
+  <div class="header-main">
   <div class="header-inner">
     <div>
       <div class="header-title">Discharge Complexity + Care Burden Scale</div>
-      <div class="header-sub">Pediatric Cardiac ICU — does not necessarily reflect medical readiness for discharge</div>
+      <div class="header-sub">Does not necessarily reflect medical readiness for discharge</div>
       <div class="progress-bar-wrap" style="max-width:360px;">
         <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
       </div>
@@ -452,6 +471,7 @@
       <div class="score-badge-max" id="scoreMax">/ max varies</div>
       <div class="score-badge-verdict" id="headerVerdict" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);">Not started</div>
     </div>
+  </div>
   </div>
 </div>
 
