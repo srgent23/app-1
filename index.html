@@ -414,9 +414,15 @@
   .verdict-box.high .verdict-desc { color: #6b3000; }
   .verdict-box.critical .verdict-desc { color: #6b1010; }
 
-  /* RESET BTN */
-  .reset-btn {
+  /* ACTION BUTTONS */
+  .action-btns {
     margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .reset-btn {
     padding: 10px 22px;
     border-radius: 8px;
     border: 1.5px solid var(--gray-mid);
@@ -429,6 +435,24 @@
     transition: all 0.18s;
   }
   .reset-btn:hover { border-color: var(--navy-dark); color: var(--navy-dark); }
+  .download-btn {
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: 1.5px solid var(--navy);
+    background: var(--navy);
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .download-btn:hover { background: var(--navy-dark); border-color: var(--navy-dark); }
+  .download-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .download-btn svg { flex-shrink: 0; }
 
   /* PROGRESS BAR */
   .progress-bar-wrap {
@@ -562,7 +586,13 @@
         <div class="verdict-title">Score all domains to see discharge recommendation</div>
         <div class="verdict-desc">Select a level for each domain above. Hard stop criteria are evaluated independently.</div>
       </div>
-      <button class="reset-btn" onclick="resetAll()">↺ Reset All Scores</button>
+      <div class="action-btns">
+        <button class="download-btn" id="downloadBtn" onclick="downloadResults()" disabled>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 1v8M4 6l3 3 3-3M2 11h10" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download Results
+        </button>
+        <button class="reset-btn" onclick="resetAll()">↺ Reset All Scores</button>
+      </div>
     </div>
   </div>
 
@@ -826,6 +856,8 @@ function updateTotals() {
   const progress = (scored / domains.length) * 100;
   document.getElementById('progressBar').style.width = progress + '%';
   document.getElementById('totalScore').textContent = total;
+  const dlBtn = document.getElementById('downloadBtn');
+  if (dlBtn) dlBtn.disabled = scored < domains.length;
   document.getElementById('scoreMax').textContent = `/ ${maxTotal} max`;
 
   updateBreakdown(total, maxTotal);
@@ -944,6 +976,8 @@ function resetAll() {
   });
   document.querySelectorAll('.conf-btn').forEach(b => b.classList.remove('selected','selected-warn'));
   document.getElementById('totalScore').textContent = '0';
+  const dlBtn = document.getElementById('downloadBtn');
+  if (dlBtn) dlBtn.disabled = true;
   document.getElementById('totalScore').style.color = 'white';
   document.getElementById('headerVerdict').textContent = 'Not started';
   document.getElementById('headerVerdict').style.background = 'rgba(255,255,255,0.1)';
@@ -954,6 +988,110 @@ function resetAll() {
   box.className = 'verdict-box light';
   box.innerHTML = `<div class="verdict-title">Score all domains to see discharge recommendation</div>
     <div class="verdict-desc">Select a level for each domain above. Hard stop criteria are evaluated independently.</div>`;
+}
+
+function downloadResults() {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  let totalWeighted = 0, maxTotal = 0;
+  domains.forEach(d => {
+    const maxRaw = Math.max(...d.levels.map(l => l.pts));
+    maxTotal += maxRaw * d.weight;
+    if (scores[d.id] !== undefined) totalWeighted += scores[d.id] * d.weight;
+  });
+
+  const verdictEl = document.getElementById('verdictBox');
+  const verdictTitle = verdictEl.querySelector('.verdict-title')?.textContent || 'N/A';
+  const verdictDesc = verdictEl.querySelector('.verdict-desc')?.textContent || '';
+
+  const hardStops = [];
+  document.querySelectorAll('.hard-stop-item.flagged .hs-text').forEach(el => hardStops.push(el.textContent.trim()));
+
+  let confText = 'Not recorded';
+  document.querySelectorAll('.conf-btn').forEach(btn => {
+    if (btn.classList.contains('selected') || btn.classList.contains('selected-warn')) {
+      confText = (btn.querySelector('.conf-abbr')?.textContent || '') + ' — ' + (btn.querySelector('.conf-label')?.textContent || '');
+    }
+  });
+
+  let rows = '';
+  domains.forEach(d => {
+    const raw = scores[d.id] !== undefined ? scores[d.id] : '—';
+    const weighted = scores[d.id] !== undefined ? scores[d.id] * d.weight : '—';
+    const selectedLevel = d.levels.find(l => l.pts === scores[d.id]);
+    const desc = selectedLevel ? selectedLevel.desc : 'Not scored';
+    rows += `<tr><td>${d.title}</td><td style="text-align:center;">${d.weight}x</td><td style="text-align:center;">${raw}</td><td style="text-align:center;font-weight:700;">${weighted}</td><td>${desc}</td></tr>`;
+  });
+
+  const bannerStyle = hardStops.length > 0
+    ? 'border-color:#c0392b;background:#fff0f0;color:#6B1010;'
+    : totalWeighted <= 5 ? 'border-color:#27ae60;background:#e8f5ee;color:#1e5038;'
+    : totalWeighted <= 10 ? 'border-color:#C8972A;background:#fdf8ec;color:#5A4000;'
+    : totalWeighted <= 31 ? 'border-color:#C47A20;background:#fef5ec;color:#5A2000;'
+    : 'border-color:#c0392b;background:#fff0f0;color:#6B1010;';
+
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<title>Discharge Score — ${dateStr}</title>
+<style>
+  body{font-family:Arial,sans-serif;margin:0;padding:28px;color:#2a1a1a;font-size:12px;}
+  .hdr{background:#8B1A1A;color:#fff;padding:14px 22px;border-radius:6px 6px 0 0;}
+  .hdr h1{font-size:15px;margin:0 0 2px;font-weight:700;}
+  .hdr p{font-size:10px;margin:0;opacity:.65;}
+  .sub{background:#6B1010;color:rgba(255,255,255,.55);padding:5px 22px;font-size:9px;letter-spacing:.08em;text-transform:uppercase;border-radius:0 0 6px 6px;margin-bottom:18px;}
+  .meta{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:18px;padding:12px 14px;background:#f7f5f4;border-radius:6px;border:1px solid #e0dbd8;}
+  .meta-item label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#6b5a5a;display:block;margin-bottom:2px;}
+  .meta-item span{font-size:13px;font-weight:700;color:#2a1a1a;}
+  .banner{text-align:center;padding:14px;border-radius:6px;margin-bottom:18px;border:2px solid;}
+  .banner .title{font-size:18px;font-weight:700;}
+  .banner .desc{font-size:11px;margin-top:5px;}
+  .sec{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#8B1A1A;margin:18px 0 7px;padding-bottom:4px;border-bottom:1.5px solid #e0dbd8;}
+  table{width:100%;border-collapse:collapse;font-size:11px;}
+  th{background:#8B1A1A;color:#fff;padding:6px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.05em;}
+  td{padding:6px 10px;border-bottom:1px solid #e0dbd8;vertical-align:top;}
+  tr:nth-child(even) td{background:#f7f5f4;}
+  .tfoot td{background:#8B1A1A;color:#fff;font-weight:700;padding:7px 10px;}
+  .hs{padding:6px 10px;background:#fff0f0;border-left:3px solid #c0392b;border-radius:3px;margin-bottom:5px;font-size:11px;color:#6B1010;}
+  .ok{padding:7px 12px;background:#e8f5ee;border-left:3px solid #1e7e4e;border-radius:3px;font-size:11px;color:#1e5038;}
+  .footer{margin-top:24px;padding-top:10px;border-top:1px solid #e0dbd8;font-size:9px;color:#6b5a5a;text-align:center;}
+  @media print{body{padding:16px;}}
+</style></head><body>
+<div class="hdr"><h1>Discharge Complexity + Care Burden Scale</h1><p>Does not necessarily reflect medical readiness for discharge</p></div>
+<div class="sub">Oklahoma Children's Hospital OU Health &nbsp;·&nbsp; Pediatric Cardiac ICU</div>
+<div class="meta">
+  <div class="meta-item"><label>Date</label><span>${dateStr}</span></div>
+  <div class="meta-item"><label>Time</label><span>${timeStr}</span></div>
+  <div class="meta-item"><label>Weighted Score</label><span>${totalWeighted} / ${maxTotal}</span></div>
+  <div class="meta-item"><label>Parent Confidence</label><span>${confText}</span></div>
+  <div class="meta-item"><label>Hard Stops Flagged</label><span>${hardStops.length > 0 ? hardStops.length + ' flagged' : 'None'}</span></div>
+</div>
+<div class="banner" style="${bannerStyle}">
+  <div class="title">${hardStops.length > 0 ? '⛔ HARD STOP FLAGGED' : verdictTitle}</div>
+  <div class="desc">${hardStops.length > 0 ? 'Discharge paused regardless of total score. See flagged items below.' : verdictDesc}</div>
+</div>
+<div class="sec">Domain Scores</div>
+<table>
+  <thead><tr><th>Domain</th><th style="text-align:center;width:50px;">Weight</th><th style="text-align:center;width:50px;">Raw</th><th style="text-align:center;width:70px;">Weighted</th><th>Selected Level</th></tr></thead>
+  <tbody>${rows}</tbody>
+  <tfoot><tr><td class="tfoot" colspan="3">Total Weighted Score</td><td class="tfoot" style="text-align:center;">${totalWeighted}</td><td class="tfoot" style="opacity:.65;">/ ${maxTotal} max</td></tr></tfoot>
+</table>
+<div class="sec">Hard Stop Checklist</div>
+${hardStops.length > 0 ? hardStops.map(s => `<div class="hs">⛔ ${s}</div>`).join('') : '<div class="ok">✓ No hard stop criteria flagged at time of scoring</div>'}
+<div class="footer">Generated ${dateStr} at ${timeStr} &nbsp;·&nbsp; Oklahoma Children's Hospital OU Health &nbsp;·&nbsp; Pediatric Cardiac ICU<br>Clinical decision support tool — does not replace clinical judgment.</div>
+</body></html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const stamp = now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + String(now.getHours()).padStart(2,'0') + String(now.getMinutes()).padStart(2,'0');
+  a.download = `discharge-score-${stamp}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 buildDomains();
